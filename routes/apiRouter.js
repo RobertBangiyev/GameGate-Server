@@ -7,6 +7,8 @@ const reviewController = require('../controllers/reviewController');
 
 router.get('/game/:id', gameController.game_details);
 
+router.get('/game/:id/reviews', gameController.game_reviews);
+
 router.get('/users', userController.user_list);
 
 router.get('/user/:username', userController.user_details);

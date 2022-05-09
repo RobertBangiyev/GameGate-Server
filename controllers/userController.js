@@ -23,7 +23,7 @@ exports.user_details = function(req, res, next) {
                 ExpressionAttributeValues: {
                     ":User3": req.params.username
                 },
-                ProjectionExpression: 'FollowingMap, Email, ProfilePicture, Following, Planning, Completed, Followers, CurrentG, Dropped, FollowersMap, Username'
+                ProjectionExpression: 'FollowingMap, Email, ProfilePicture, Following, Planning, PlanningGames, Completed, CompletedGames, Followers, CurrentG, CurrentGames, Dropped, DroppedGames, FollowersMap, Username'
             }
             docClient.query(params, function(err, results) {
                 callback(err, results);
@@ -57,13 +57,138 @@ exports.user_details = function(req, res, next) {
     })
 }
 
+exports.user_followers = function(req, res, next) {
+    const params = {
+        TableName: "GameGateAccounts",
+        IndexName: "Username-index",
+        KeyConditionExpression: "#username = :User3",
+        ExpressionAttributeNames: {
+            "#username": "Username"
+        },
+        ExpressionAttributeValues: {
+            ":User3": req.params.username
+        },
+        ProjectionExpression: 'Followers, FollowersMap'
+    }
+    docClient.query(params, function(err, results) {
+        if(err) { return next(err); }
+        else {
+            res.json(results);
+        }
+    })
+}
+
+exports.user_followings = function(req, res, next) {
+    const params = {
+        TableName: "GameGateAccounts",
+        IndexName: "Username-index",
+        KeyConditionExpression: "#username = :User3",
+        ExpressionAttributeNames: {
+            "#username": "Username"
+        },
+        ExpressionAttributeValues: {
+            ":User3": req.params.username
+        },
+        ProjectionExpression: 'Following, FollowingMap'
+    }
+    docClient.query(params, function(err, results) {
+        if(err) { return next(err); }
+        else {
+            res.json(results);
+        }
+    })
+}
+
+exports.user_planning = function(req, res, next) {
+    const params = {
+        TableName: "GameGateAccounts",
+        IndexName: "Username-index",
+        KeyConditionExpression: "#username = :User3",
+        ExpressionAttributeNames: {
+            "#username": "Username"
+        },
+        ExpressionAttributeValues: {
+            ":User3": req.params.username
+        },
+        ProjectionExpression: 'Planning, PlanningGames'
+    }
+    docClient.query(params, function(err, results) {
+        if(err) { return next(err); }
+        else {
+            res.json(results);
+        }
+    })
+}
+
+exports.user_completed = function(req, res, next) {
+    const params = {
+        TableName: "GameGateAccounts",
+        IndexName: "Username-index",
+        KeyConditionExpression: "#username = :User3",
+        ExpressionAttributeNames: {
+            "#username": "Username"
+        },
+        ExpressionAttributeValues: {
+            ":User3": req.params.username
+        },
+        ProjectionExpression: 'Completed, CompletedGames'
+    }
+    docClient.query(params, function(err, results) {
+        if(err) { return next(err); }
+        else {
+            res.json(results);
+        }
+    })
+}
+
+exports.user_current = function(req, res, next) {
+    const params = {
+        TableName: "GameGateAccounts",
+        IndexName: "Username-index",
+        KeyConditionExpression: "#username = :User3",
+        ExpressionAttributeNames: {
+            "#username": "Username"
+        },
+        ExpressionAttributeValues: {
+            ":User3": req.params.username
+        },
+        ProjectionExpression: 'CurrentG, CurrentGames'
+    }
+    docClient.query(params, function(err, results) {
+        if(err) { return next(err); }
+        else {
+            res.json(results);
+        }
+    })
+}
+
+exports.user_dropped = function(req, res, next) {
+    const params = {
+        TableName: "GameGateAccounts",
+        IndexName: "Username-index",
+        KeyConditionExpression: "#username = :User3",
+        ExpressionAttributeNames: {
+            "#username": "Username"
+        },
+        ExpressionAttributeValues: {
+            ":User3": req.params.username
+        },
+        ProjectionExpression: 'Dropped, DroppedGames'
+    }
+    docClient.query(params, function(err, results) {
+        if(err) { return next(err); }
+        else {
+            res.json(results);
+        }
+    })
+}
+
 exports.user_list = function(req, res, next) {
     const params = {
         TableName: "GameGateAccounts",
-        ProjectionExpression: 'FollowingMap, Email, ProfilePicture, Following, Planning, Completed, Followers, CurrentG, Dropped, FollowersMap, Username'
+        ProjectionExpression: 'FollowingMap, Email, ProfilePicture, Following, Planning, PlanningGames, Completed, CompletedGames, Followers, CurrentG, CurrentGames, Dropped, DroppedGames, FollowersMap, Username'
     };
     docClient.scan(params, function(err, results) {
-        // console.log(results);
         if(err) { return next(err); }
         else {
             res.json(results);

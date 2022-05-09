@@ -15,6 +15,8 @@ router.get('/user/:username', userController.user_details);
 
 router.get('/user/:username/followers', userController.user_followers);
 
+router.get('/user/:username/followings', userController.user_followings);
+
 router.get('/reviews', reviewController.review_list);
 
 module.exports = router;

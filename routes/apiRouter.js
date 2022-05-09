@@ -13,6 +13,8 @@ router.get('/users', userController.user_list);
 
 router.get('/user/:username', userController.user_details);
 
+router.get('/user/:username/followers', userController.user_followers);
+
 router.get('/reviews', reviewController.review_list);
 
 module.exports = router;

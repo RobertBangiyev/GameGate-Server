@@ -25,6 +25,8 @@ router.get('/user/:username/current', userController.user_current);
 
 router.get('/user/:username/dropped', userController.user_dropped);
 
+router.get('/user/:username/gamestatuses', userController.user_game_statuses);
+
 router.get('/reviews', reviewController.review_list);
 
 module.exports = router;

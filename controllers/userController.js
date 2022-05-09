@@ -26,7 +26,14 @@ exports.user_details = function(req, res, next) {
                 ProjectionExpression: 'FollowingMap, Email, ProfilePicture, Following, Planning, PlanningGames, Completed, CompletedGames, Followers, CurrentG, CurrentGames, Dropped, DroppedGames, FollowersMap, Username'
             }
             docClient.query(params, function(err, results) {
-                callback(err, results);
+                let error = new Error('User does not exist');
+                if(results.Count==0) {
+                    error.status = 404;
+                    callback(error);
+                }
+                else {
+                    callback(err, results);
+                }
             })
         },
         function(results, callback) {

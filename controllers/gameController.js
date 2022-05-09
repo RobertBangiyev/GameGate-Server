@@ -81,3 +81,22 @@ exports.game_details = function(req, res, next) {
         res.json(output);
     })
 }
+
+exports.game_reviews = function(req, res, next) {
+    const params = {
+        TableName: "Games",
+        KeyConditionExpression: "#gameID = :gameID3",
+        ExpressionAttributeNames: {
+            "#gameID": "GameID",
+        },
+        ExpressionAttributeValues: {
+            ":gameID3": req.params.id
+        }
+    };
+    docClient.query(params, function(err, data) {
+        if(err) { return next(err); }
+        else {
+            res.json(data);
+        }
+    })
+}

@@ -100,3 +100,50 @@ exports.game_reviews = function(req, res, next) {
         }
     })
 }
+
+exports.game_list = function(req, res, next) {
+    const { searchTerm } = req.query;
+    if(searchTerm) {
+        var data = `search "${searchTerm}";fields name,cover.url;`;
+
+        var config = {
+            method: 'post',
+            url: 'https://api.igdb.com/v4/games',
+            headers: { 
+                'Client-ID': process.env.CLIENT_ID,
+                'Authorization': process.env.BEARER_TOKEN, 
+                'Content-Type': 'text/plain'
+            },
+            data : data
+        };
+
+        axios(config)
+        .then(function (response) {
+            res.json(response.data);
+        })
+        .catch(function (error) {
+            res.json(error);
+        });
+    } else {
+        var data = 'fields name,cover.url; limit 20;';
+
+        var config = {
+        method: 'post',
+        url: 'https://api.igdb.com/v4/games',
+        headers: { 
+            'Client-ID': process.env.CLIENT_ID,
+            'Authorization': process.env.BEARER_TOKEN, 
+            'Content-Type': 'text/plain'
+        },
+        data : data
+        };
+
+        axios(config)
+        .then(function (response) {
+            res.json(response.data);
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+    }
+}

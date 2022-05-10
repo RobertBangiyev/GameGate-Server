@@ -233,14 +233,41 @@ exports.user_game_statuses = function(req, res, next) {
 }
 
 exports.user_list = function(req, res, next) {
-    const params = {
-        TableName: "GameGateAccounts",
-        ProjectionExpression: 'FollowingMap, Email, ProfilePicture, Following, Planning, PlanningGames, Completed, CompletedGames, Followers, CurrentG, CurrentGames, Dropped, DroppedGames, FollowersMap, Username'
-    };
-    docClient.scan(params, function(err, results) {
-        if(err) { return next(err); }
-        else {
-            res.json(results);
+    const { Username } = req.query;
+    if(Username) {
+        const params = {
+            TableName: "GameGateAccounts",
+            IndexName: "Username-index",
+            KeyConditionExpression: "#username = :User3",
+            ExpressionAttributeNames: {
+                "#username": "Username"
+            },
+            ExpressionAttributeValues: {
+                ":User3": Username
+            },
+            ProjectionExpression: 'ProfilePicture, Username'
         }
-    })
+        docClient.query(params, function(err, results) {
+            let error = new Error('User does not exist');
+            if(results.Count==0) {
+                error.status = 404;
+                return next(error);
+            }
+            else {
+                res.json(results);
+            }
+        })
+    }
+    else {
+        const params = {
+            TableName: "GameGateAccounts",
+            ProjectionExpression: 'Email, ProfilePicture, Following, Planning, PlanningGames, Completed, CompletedGames, Followers, CurrentG, CurrentGames, Dropped, DroppedGames, FollowersMap, Username'
+        };
+        docClient.scan(params, function(err, results) {
+            if(err) { return next(err); }
+            else {
+                res.json(results);
+            }
+        })
+    }
 }

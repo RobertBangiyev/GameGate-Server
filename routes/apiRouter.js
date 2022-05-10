@@ -17,6 +17,8 @@ router.get('/user/:username/followers', userController.user_followers);
 
 router.get('/user/:username/followings', userController.user_followings);
 
+router.get('/user/:username/follows', userController.user_follows);
+
 router.get('/user/:username/planning', userController.user_planning);
 
 router.get('/user/:username/completed', userController.user_completed);

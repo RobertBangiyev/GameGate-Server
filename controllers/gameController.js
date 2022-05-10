@@ -104,7 +104,7 @@ exports.game_reviews = function(req, res, next) {
 exports.game_list = function(req, res, next) {
     const { searchTerm } = req.query;
     if(searchTerm) {
-        var data = `search "${searchTerm}";fields name,cover.url;`;
+        var data = `search "${searchTerm}";fields name,cover.url, first_release_date;`;
 
         var config = {
             method: 'post',
@@ -125,7 +125,7 @@ exports.game_list = function(req, res, next) {
             res.json(error);
         });
     } else {
-        var data = 'fields name,cover.url; limit 20;';
+        var data = 'fields name,cover.url, first_release_date; limit 20;';
 
         var config = {
         method: 'post',

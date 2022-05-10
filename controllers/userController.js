@@ -275,6 +275,7 @@ exports.user_dropped = function(req, res, next) {
 }
 
 exports.user_game_statuses = function(req, res, next) {
+    const { gameName } = req.query;
     const params = {
         TableName: "GameGateAccounts",
         IndexName: "Username-index",
@@ -290,7 +291,25 @@ exports.user_game_statuses = function(req, res, next) {
     docClient.query(params, function(err, results) {
         if(err) { return next(err); }
         else {
-            res.json(results);
+            if(gameName) {
+                const arr = ['PlanningGames', 'CompletedGames', 'CurrentGames', 'DroppedGames'];
+                for(let i of arr) {
+                    for(let j in results.Items[0][i]) {
+                        if(j == gameName) {
+                            res.json({
+                                status: i
+                            });
+                            return;
+                        }
+                    }
+                }
+                res.json({
+                    status: null
+                })
+            }
+            else {
+                res.json(results);
+            }
         }
     })
 }

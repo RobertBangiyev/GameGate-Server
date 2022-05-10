@@ -106,6 +106,27 @@ exports.user_followings = function(req, res, next) {
     })
 }
 
+exports.user_follows = function(req, res, next) {
+    const params = {
+        TableName: "GameGateAccounts",
+        IndexName: "Username-index",
+        KeyConditionExpression: "#username = :User3",
+        ExpressionAttributeNames: {
+            "#username": "Username"
+        },
+        ExpressionAttributeValues: {
+            ":User3": req.params.username
+        },
+        ProjectionExpression: 'Followers, FollowersMap, Following, FollowingMap'
+    }
+    docClient.query(params, function(err, results) {
+        if(err) { return next(err); }
+        else {
+            res.json(results);
+        }
+    })
+}
+
 exports.user_planning = function(req, res, next) {
     const params = {
         TableName: "GameGateAccounts",

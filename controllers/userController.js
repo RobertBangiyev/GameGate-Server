@@ -1,5 +1,6 @@
 var async = require('async');
 const AWS = require('aws-sdk');
+const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
 
 var myCredentials = new AWS.CognitoIdentityCredentials({IdentityPoolId:'us-east-1:1f1634e0-e85f-4ffe-a509-ecb75c777309'});
 var myConfig = new AWS.Config({
@@ -9,6 +10,68 @@ var myConfig = new AWS.Config({
 AWS.config.update(myConfig);
 
 const docClient = new AWS.DynamoDB.DocumentClient();
+
+exports.user_login = function(req, res, next) {
+    console.log(req.body.email);
+    var params = {
+        TableName: "GameGateAccounts",
+        Key: {
+            "Email": req.body.email
+        }
+    }
+    docClient.get(params, function(err, data) {
+        if(err) {
+            console.log(err);
+            res.send(err);
+        } else if(Object.keys(data).length === 0) {
+            const error = new Error('No user found');
+            error.status = 401;
+            next(error);
+        }
+        else if (!err && Object.keys(data).length !== 0) {
+            if (req.body.password === data.Item.Password) {
+
+                    const authDetails = new AmazonCognitoIdentity.AuthenticationDetails({
+                        Username: req.body.email,
+                        Password: req.body.password,
+                    })
+                    const poolData = {
+                        UserPoolId: "us-east-1_hWhzBDves",
+                        ClientId: "4bihl57dd69s099uhp3alaj649"
+                    }
+
+                    const UserPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+
+                    const user = new AmazonCognitoIdentity.CognitoUser({
+                        Username: req.body.email,
+                        Pool: UserPool,
+                    })
+
+                    user.authenticateUser(authDetails, {
+                        onSuccess: function(result) {
+                            var accessToken = result.getAccessToken().getJwtToken();
+
+                            var idToken = result.idToken.jwtToken;
+                            // res.json({
+                            //     accessToken: accessToken,
+                            //     idToken: idToken
+                            // })
+                            const newData = {};
+                            for(let i in data.Item) {
+                                if(i !== 'Password') {
+                                    newData[i] = data.Item[i];
+                                }
+                            }
+                            res.json(newData);
+                        },
+                        onFailure: function(err) {
+                            res.send(err);
+                        }
+                    })
+                }
+        }
+    })
+}
 
 exports.user_details = function(req, res, next) {
     async.waterfall([

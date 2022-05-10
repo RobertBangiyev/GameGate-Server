@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/RobertBangiyev/GameGate-Server#readme",
   "dependencies": {
+    "amazon-cognito-identity-js": "^5.2.8",
     "async": "^3.2.3",
     "aws-sdk": "^2.1130.0",
     "axios": "^0.27.2",

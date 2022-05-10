@@ -292,6 +292,12 @@ exports.user_game_statuses = function(req, res, next) {
         if(err) { return next(err); }
         else {
             if(gameName) {
+                if(results.Count === 0) {
+                    res.json({
+                        status: null
+                    })
+                    return;
+                }
                 const arr = ['PlanningGames', 'CompletedGames', 'CurrentGames', 'DroppedGames'];
                 for(let i of arr) {
                     for(let j in results.Items[0][i]) {

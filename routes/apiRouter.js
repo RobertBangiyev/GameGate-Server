@@ -13,6 +13,8 @@ router.get('/games', gameController.game_list);
 
 router.get('/users', userController.user_list);
 
+router.post('/users/login', userController.user_login);
+
 router.get('/user/:username', userController.user_details);
 
 router.get('/user/:username/followers', userController.user_followers);

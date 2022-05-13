@@ -1,5 +1,7 @@
 var async = require('async');
 const AWS = require('aws-sdk');
+var jwt = require('jsonwebtoken');
+var jwkToPem = require('jwk-to-pem');
 const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
 
 var myCredentials = new AWS.CognitoIdentityCredentials({IdentityPoolId:'us-east-1:1f1634e0-e85f-4ffe-a509-ecb75c777309'});
@@ -12,7 +14,6 @@ AWS.config.update(myConfig);
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 exports.user_login = function(req, res, next) {
-    console.log(req.body.email);
     var params = {
         TableName: "GameGateAccounts",
         Key: {
@@ -21,7 +22,6 @@ exports.user_login = function(req, res, next) {
     }
     docClient.get(params, function(err, data) {
         if(err) {
-            console.log(err);
             res.send(err);
         } else if(Object.keys(data).length === 0) {
             const error = new Error('No user found');
@@ -49,20 +49,20 @@ exports.user_login = function(req, res, next) {
 
                     user.authenticateUser(authDetails, {
                         onSuccess: function(result) {
-                            var accessToken = result.getAccessToken().getJwtToken();
+                            const idToken = result.idToken.jwtToken;
+                            const refreshToken = result.getRefreshToken().getToken();
 
-                            var idToken = result.idToken.jwtToken;
-                            // res.json({
-                            //     accessToken: accessToken,
-                            //     idToken: idToken
-                            // })
                             const newData = {};
                             for(let i in data.Item) {
                                 if(i !== 'Password') {
                                     newData[i] = data.Item[i];
                                 }
                             }
-                            res.json(newData);
+                            res.json({
+                                userInfo: newData,
+                                refreshToken: refreshToken,
+                                idToken: idToken
+                            });
                         },
                         onFailure: function(err) {
                             res.send(err);

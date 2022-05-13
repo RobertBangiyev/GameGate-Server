@@ -38,8 +38,6 @@ router.get('/reviews', reviewController.review_list);
 
 router.use(generalController.verify_login);
 
-router.post('/reviews', (req, res) => {
-    res.send(req.body);
-})
+router.post('/reviews', reviewController.game_reviews_create);
 
 module.exports = router;

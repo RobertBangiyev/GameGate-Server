@@ -55,3 +55,69 @@ exports.review_list = function(req, res, next) {
     }
   })
 }
+
+
+exports.game_reviews_create = function(req, res, next) {
+  const newId = req.body.newId ? true : false;
+  var params = {
+    TableName: "Games",
+    Item: {
+        "GameID": req.body.id,
+        "GameName": req.body.gameName,
+        "Email": req.body.email,
+        "Username": req.body.username,
+        "Review": req.body.reviewText,
+        "Rating": req.body.reviewScore,
+        "GameImage": req.body.gameImg,
+        "ProfilePic": req.body.profPic,
+        "Upvotes": {},
+        "UpvotesCount": 0
+    }
+  }
+  docClient.put(params, function(err, data) {
+    if (!err) {
+      const reviewInfo = JSON.parse(req.body.reviewInfo);
+        const moreReviewInfo = [...reviewInfo];
+        let found = false;
+        for(let i = 0; i < moreReviewInfo.length; i++) {
+            if(moreReviewInfo[i].Username === req.body.username) {
+                moreReviewInfo[i] = {
+                    GameID: req.body.id,
+                    GameName: req.body.gameName,
+                    Email: req.body.email,
+                    Username: req.body.username,
+                    Review: req.body.reviewText,
+                    Rating: req.body.reviewScore,
+                    GameImage: req.body.gameImg,
+                    ProfilePic: req.body.profPic,
+                    Upvotes: {},
+                    UpvotesCount: 0
+                }
+                found = true;
+            }
+        }
+        if(!found) {
+            moreReviewInfo.push({
+                GameID: req.body.id,
+                GameName: req.body.gameName,
+                Email: req.body.email,
+                Username: req.body.username,
+                Review: req.body.reviewText,
+                Rating: req.body.reviewScore,
+                GameImage: req.body.gameImg,
+                ProfilePic: req.body.profPic,
+                Upvotes: {},
+                UpvotesCount: 0
+            });
+        }
+        res.json({
+          idToken: req.body.idToken,
+          newId: newId,
+          reviewInfo: moreReviewInfo
+        })
+        return;
+    } else {
+        return next(err);
+    }
+})
+}

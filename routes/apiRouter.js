@@ -14,6 +14,8 @@ router.get('/games', gameController.game_list);
 
 router.get('/users', userController.user_list);
 
+router.post('/users', userController.user_registration);
+
 router.post('/users/login', userController.user_login);
 
 router.get('/user/:username', userController.user_details);

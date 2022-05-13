@@ -1,7 +1,5 @@
 var async = require('async');
 const AWS = require('aws-sdk');
-var jwt = require('jsonwebtoken');
-var jwkToPem = require('jwk-to-pem');
 const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
 
 var myCredentials = new AWS.CognitoIdentityCredentials({IdentityPoolId:'us-east-1:1f1634e0-e85f-4ffe-a509-ecb75c777309'});
@@ -22,7 +20,9 @@ exports.user_login = function(req, res, next) {
     }
     docClient.get(params, function(err, data) {
         if(err) {
-            res.send(err);
+            const error = new Error('Incorrect credentials');
+            error.status = 400;
+            return next(error);
         } else if(Object.keys(data).length === 0) {
             const error = new Error('No user found');
             error.status = 401;
@@ -30,7 +30,6 @@ exports.user_login = function(req, res, next) {
         }
         else if (!err && Object.keys(data).length !== 0) {
             if (req.body.password === data.Item.Password) {
-
                     const authDetails = new AmazonCognitoIdentity.AuthenticationDetails({
                         Username: req.body.email,
                         Password: req.body.password,
@@ -65,10 +64,112 @@ exports.user_login = function(req, res, next) {
                             });
                         },
                         onFailure: function(err) {
-                            res.send(err);
+                            const error = new Error('Incorrect credentials');
+                            error.status = 400;
+                            return next(error);
                         }
                     })
+            } else {
+                const error = new Error('Incorrect credentials');
+                error.status = 400;
+                return next(error);
+            }
+        }
+    })
+}
+
+exports.user_registration = function(req, res, next) {
+    let error = new Error('Email or username already in use');
+    error.status = 400;
+    async.parallel({
+        email: function(callback) {
+            const params = {
+                TableName: "GameGateAccounts",
+                KeyConditionExpression: "#email = :email3",
+                ExpressionAttributeNames: {
+                    "#email": "Email"
+                },
+                ExpressionAttributeValues: {
+                    ":email3": req.body.email
                 }
+            }
+            docClient.query(params, function(err, data) {
+                callback(err, data);
+            })
+        },
+        username: function(callback) {
+            var params = {
+                TableName: "GameGateAccounts",
+                IndexName: "Username-index",
+                KeyConditionExpression: "#username = :User3",
+                ExpressionAttributeNames: {
+                    "#username": "Username"
+                },
+                ExpressionAttributeValues: {
+                    ":User3": req.body.username
+                }
+            }
+            docClient.query(params, function(err, data){
+                callback(err, data);
+            })
+        }
+    }, function(err, results) {
+        if(err) { 
+            return next(err); 
+        }
+        else {
+            if(results.email.Count === 0 && results.username.Count === 0) {
+                const poolData = {
+                    UserPoolId: "us-east-1_hWhzBDves",
+                    ClientId: "4bihl57dd69s099uhp3alaj649"
+                }
+
+                const UserPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+                UserPool.signUp(req.body.email, req.body.pw, [], null, (err, data) => {
+                    if(err) {
+                        const err = new Error("Password must be at least 6 characters");
+                        err.status = 400;
+                        return next(err);
+                    } else {
+                        var params = {
+                            TableName: "GameGateAccounts",
+                            Item: {
+                                "Email": req.body.email,
+                                "Password": req.body.pw,
+                                "Username": req.body.username,
+                                "ProfilePicture": "https://i.imgur.com/y0B5yj6.jpg",
+                                "CurrentG": 0,
+                                "Completed": 0,
+                                "Dropped": 0,
+                                "Planning": 0,
+                                "Followers": 0,
+                                "Following": 0,
+                                "FollowersMap": {},
+                                "FollowingMap": {},
+                                "CompletedGames": {},
+                                "CurrentGames": {},
+                                "DroppedGames": {},
+                                "PlanningGames": {}
+                            }
+                        }
+                        docClient.put(params, function(err, data) {
+                            if (err) {
+                                const error = new Error('Registration failed');
+                                error.status = 400;
+                                return next(error);
+                            } else {
+                                res.json({
+                                    success: true
+                                });
+                            }
+                        })
+                    }
+                })
+            } else {
+                const error = new Error('Email or username already used');
+                error.status = 400;
+                return next(error);
+            }
         }
     })
 }

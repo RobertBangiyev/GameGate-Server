@@ -4,6 +4,7 @@ const router = express.Router();
 const gameController = require('../controllers/gameController');
 const userController = require('../controllers/userController');
 const reviewController = require('../controllers/reviewController');
+const generalController = require('../controllers/generalController');
 
 router.get('/game/:id', gameController.game_details);
 
@@ -34,5 +35,11 @@ router.get('/user/:username/dropped', userController.user_dropped);
 router.get('/user/:username/gamestatuses', userController.user_game_statuses);
 
 router.get('/reviews', reviewController.review_list);
+
+router.use(generalController.verify_login);
+
+router.post('/reviews', (req, res) => {
+    res.send(req.body);
+})
 
 module.exports = router;

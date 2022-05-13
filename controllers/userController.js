@@ -149,7 +149,8 @@ exports.user_registration = function(req, res, next) {
                                 "CompletedGames": {},
                                 "CurrentGames": {},
                                 "DroppedGames": {},
-                                "PlanningGames": {}
+                                "PlanningGames": {},
+                                "UserFeedIDs": []
                             }
                         }
                         docClient.put(params, function(err, data) {

@@ -55,7 +55,7 @@ exports.verify_login = function(req, res, next) {
                     return next(error); 
                 }
                 else {
-                    req.newIdToken = session.idToken.jwtToken;
+                    req.body.newId = true;
                     req.body.idToken = session.idToken.jwtToken;
                     return next();
                 }

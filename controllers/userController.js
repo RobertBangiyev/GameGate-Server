@@ -1,5 +1,6 @@
 var async = require('async');
 const AWS = require('aws-sdk');
+const bcrypt = require('bcryptjs');
 const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
 
 var myCredentials = new AWS.CognitoIdentityCredentials({IdentityPoolId:'us-east-1:1f1634e0-e85f-4ffe-a509-ecb75c777309'});
@@ -29,10 +30,11 @@ exports.user_login = function(req, res, next) {
             next(error);
         }
         else if (!err && Object.keys(data).length !== 0) {
-            if (req.body.password === data.Item.Password) {
+            const samePass = bcrypt.compareSync(req.body.password, data.Item.Password);
+            if (samePass) {
                     const authDetails = new AmazonCognitoIdentity.AuthenticationDetails({
                         Username: req.body.email,
-                        Password: req.body.password,
+                        Password: data.Item.Password,
                     })
                     const poolData = {
                         UserPoolId: "us-east-1_hWhzBDves",
@@ -125,7 +127,11 @@ exports.user_registration = function(req, res, next) {
                 }
 
                 const UserPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
-                UserPool.signUp(req.body.email, req.body.pw, [], null, (err, data) => {
+
+                const newSalt = bcrypt.genSaltSync(10);
+                const hashedPassword = bcrypt.hashSync(req.body.pw, newSalt);
+
+                UserPool.signUp(req.body.email, hashedPassword, [], null, (err, data) => {
                     if(err) {
                         const err = new Error("Password must be at least 6 characters");
                         err.status = 400;
@@ -135,7 +141,7 @@ exports.user_registration = function(req, res, next) {
                             TableName: "GameGateAccounts",
                             Item: {
                                 "Email": req.body.email,
-                                "Password": req.body.pw,
+                                "Password": hashedPassword,
                                 "Username": req.body.username,
                                 "ProfilePicture": "https://i.imgur.com/y0B5yj6.jpg",
                                 "CurrentG": 0,

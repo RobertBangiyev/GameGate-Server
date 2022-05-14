@@ -467,3 +467,71 @@ exports.user_list = function(req, res, next) {
         })
     }
 }
+
+exports.user_followings_add = function(req, res, next) {
+    const newId = req.body.newId ? true : false;
+    var params = {
+        TableName:"GameGateAccounts",
+            Key:{
+            "Email": req.body.email,
+        },
+        UpdateExpression: "SET #fl.#userN = :userViewedName, Following = Following + :val",
+        ConditionExpression: "attribute_not_exists(#fl.#userN.Username)",
+        ExpressionAttributeNames: {
+            "#fl": "FollowingMap",
+            "#userN": req.body.theirEmail
+        },
+        ExpressionAttributeValues:{
+            ":userViewedName":{
+                "Username": req.body.theirUsername,
+                "ProfilePicture": req.body.theirProfilePicture
+            },
+            ":val": 1
+        },
+        ReturnValues:"UPDATED_NEW"
+    };
+    docClient.update(params, function(err, data) {
+        if(err) { return next(err); }
+        else {
+            res.json({
+                idToken: req.body.idToken,
+                newId: newId,
+                newFollowingsInfo: data
+            });
+        }
+    })
+}
+
+exports.user_followers_add = function(req, res, next) {
+    const newId = req.body.newId ? true : false;
+    var params = {
+        TableName:"GameGateAccounts",
+            Key:{
+            "Email": req.body.theirEmail,
+        },
+        UpdateExpression: "SET #fl.#userN = :yourUsername, Followers = Followers + :val",
+        ConditionExpression: "attribute_not_exists(#fl.#userN.Username)",
+        ExpressionAttributeNames: {
+            "#fl": "FollowersMap",
+            "#userN": req.body.email
+        },
+        ExpressionAttributeValues:{
+            ":yourUsername":{
+                "Username": req.body.username,
+                "ProfilePicture": req.body.profilePic
+            },
+            ":val": 1
+        },
+        ReturnValues:"UPDATED_NEW"
+    };
+    docClient.update(params, function(err, data) {
+        if(err) { return next(err); }
+        else {
+            res.json({
+                idToken: req.body.idToken,
+                newId: newId,
+                newFollowersInfo: data
+            });
+        }
+    })
+}

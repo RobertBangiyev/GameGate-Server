@@ -42,4 +42,8 @@ router.use(generalController.verify_login);
 
 router.post('/reviews', reviewController.game_reviews_create);
 
+router.post('/user/:username/following', userController.user_followings_add);
+
+router.post('/user/:username/followers', userController.user_followers_add);
+
 module.exports = router;

@@ -535,3 +535,63 @@ exports.user_followers_add = function(req, res, next) {
         }
     })
 }
+
+exports.user_followings_delete = function(req, res, next) {
+    const newId = req.body.newId ? true : false;
+    var params = {
+        TableName:"GameGateAccounts",
+            Key:{
+            "Email": req.body.email,
+        },
+        UpdateExpression: "REMOVE #fl.#userN SET Following = Following - :val",
+        ConditionExpression: "attribute_exists(#fl.#userN.Username)",
+        ExpressionAttributeNames: {
+            "#fl": "FollowingMap",
+            "#userN": req.body.theirEmail
+        },
+        ExpressionAttributeValues:{
+            ":val": 1
+        },
+        ReturnValues:"UPDATED_NEW"
+    };
+    docClient.update(params, function(err, data) {
+        if(err) { return next(err); }
+        else {
+            res.json({
+                idToken: req.body.idToken,
+                newId: newId,
+                newFollowingsInfo: data
+            });
+        }
+    })
+}
+
+exports.user_followers_delete = function(req, res, next) {
+    const newId = req.body.newId ? true : false;
+    var params = {
+        TableName:"GameGateAccounts",
+            Key:{
+            "Email": req.body.theirEmail,
+        },
+        UpdateExpression: "REMOVE #fl.#userN SET Followers = Followers - :val",
+        ConditionExpression: "attribute_exists(#fl.#userN.Username)",
+        ExpressionAttributeNames: {
+            "#fl": "FollowersMap",
+            "#userN": req.body.email
+        },
+        ExpressionAttributeValues:{
+            ":val": 1
+        },
+        ReturnValues:"UPDATED_NEW"
+    };
+    docClient.update(params, function(err, data) {
+        if(err) { return next(err); }
+        else {
+            res.json({
+                idToken: req.body.idToken,
+                newId: newId,
+                newFollowersInfo: data
+            });
+        }
+    })
+}

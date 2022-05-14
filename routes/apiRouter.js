@@ -48,6 +48,6 @@ router.post('/user/:username/followers', userController.user_followers_add);
 
 router.post('/user/:username/following/delete', userController.user_followings_delete);
 
-// router.post('/user/:username/followers/delete', userController.user_followers_add);
+router.post('/user/:username/followers/delete', userController.user_followers_delete);
 
 module.exports = router;

@@ -52,5 +52,7 @@ router.post('/user/:username/followers/delete', userController.user_followers_de
 
 router.post('/user/:username/planning', userController.user_planning_add);
 
+router.post('/user/:username/planning/delete', userController.user_planning_delete);
+
 
 module.exports = router;

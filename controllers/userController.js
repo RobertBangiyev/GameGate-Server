@@ -595,3 +595,38 @@ exports.user_followers_delete = function(req, res, next) {
         }
     })
 }
+
+exports.user_planning_add = function(req, res, next) {
+    const newId = req.body.newId ? true : false;
+    var params = {
+        TableName:"GameGateAccounts",
+            Key:{
+            "Email": req.body.email,
+        },
+        UpdateExpression: "SET #pg.#gn = :gameMap, Planning = Planning + :val" ,
+        ConditionExpression: "attribute_not_exists(#pg.#gn.GameName)",
+        ExpressionAttributeNames: {
+            "#pg": "PlanningGames",
+            "#gn": req.body.gameName
+        },
+        ExpressionAttributeValues:{
+            ":gameMap": {
+                "GameName": req.body.gameName,
+                "GameID": req.body.gameID,
+                "GameCover": req.body.gameImg
+            },
+            ":val": 1,
+        },
+        ReturnValues:"UPDATED_NEW"
+    };
+    docClient.update(params, function(err, data) {
+        if(err) { return next(err); }
+        else {
+            res.json({
+                idToken: req.body.idToken,
+                newId: newId,
+                newPlanningInfo: data
+            });
+        }
+    })
+}

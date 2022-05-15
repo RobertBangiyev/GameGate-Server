@@ -660,3 +660,68 @@ exports.user_planning_delete = function(req, res, next) {
         }
     })
 }
+
+exports.user_completed_add = function(req, res, next) {
+    const newId = req.body.newId ? true : false;
+    var params = {
+        TableName:"GameGateAccounts",
+            Key:{
+            "Email": req.body.email,
+        },
+        UpdateExpression: "SET #cg.#gn = :gameMap, Completed = Completed + :val" ,
+        ConditionExpression: "attribute_not_exists(#cg.#gn.GameName)",
+        ExpressionAttributeNames: {
+            "#cg": "CompletedGames",
+            "#gn": req.body.gameName
+        },
+        ExpressionAttributeValues:{
+            ":gameMap": {
+                "GameName": req.body.gameName,
+                "GameID": req.body.gameID,
+                "GameCover": req.body.gameImg
+            },
+            ":val": 1,
+        },
+        ReturnValues:"UPDATED_NEW"
+    };
+    docClient.update(params, function(err, data) {
+        if(err) { return next(err); }
+        else {
+            res.json({
+                idToken: req.body.idToken,
+                newId: newId,
+                newCompletedInfo: data
+            });
+        }
+    })
+}
+
+exports.user_completed_delete = function(req, res, next) {
+    const newId = req.body.newId ? true : false;
+    var params = {
+        TableName:"GameGateAccounts",
+            Key:{
+            "Email": req.body.email,
+        },
+        UpdateExpression: "REMOVE #cg.#gn SET Completed = Completed - :val" ,
+        ConditionExpression: "attribute_exists(#cg.#gn.GameName)",
+        ExpressionAttributeNames: {
+            "#cg": "CompletedGames",
+            "#gn": req.body.gameName
+        },
+        ExpressionAttributeValues:{
+            ":val": 1,
+        },
+        ReturnValues:"UPDATED_NEW"
+    };
+    docClient.update(params, function (err, data) {
+        if(err) { return next(err); }
+        else {
+            res.json({
+                idToken: req.body.idToken,
+                newId: newId,
+                newCompletedInfo: data
+            });
+        }
+    })
+}

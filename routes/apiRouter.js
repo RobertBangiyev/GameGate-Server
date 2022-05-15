@@ -54,5 +54,8 @@ router.post('/user/:username/planning', userController.user_planning_add);
 
 router.post('/user/:username/planning/delete', userController.user_planning_delete);
 
+router.post('/user/:username/completed', userController.user_completed_add);
+
+router.post('/user/:username/completed/delete', userController.user_completed_delete);
 
 module.exports = router;

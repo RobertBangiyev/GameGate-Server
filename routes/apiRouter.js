@@ -62,4 +62,8 @@ router.post('/user/:username/current', userController.user_current_add);
 
 router.post('/user/:username/current/delete', userController.user_current_delete);
 
+router.post('/user/:username/dropped', userController.user_dropped_add);
+
+router.post('/user/:username/dropped/delete', userController.user_dropped_delete);
+
 module.exports = router;

@@ -121,3 +121,68 @@ exports.game_reviews_create = function(req, res, next) {
     }
 })
 }
+
+exports.game_reviews_upvote = function(req, res, next) {
+  const newId = req.body.newId ? true : false;
+  var params = {
+    TableName:"Games",
+        Key:{
+        "GameID": req.body.gameID.toString(),
+        "Email": req.body.theirEmail
+    },
+    UpdateExpression: "SET #uv.#em = :upvote, UpvotesCount = UpvotesCount + :val" ,
+    ConditionExpression: "attribute_not_exists(#uv.#em.Username)",
+    ExpressionAttributeNames: {
+        "#uv": "Upvotes",
+        "#em": req.body.email
+    },
+    ExpressionAttributeValues:{
+        ":upvote": {
+            "Username": req.body.username,
+        },
+        ":val": 1,
+    },
+    ReturnValues:"UPDATED_NEW"
+  };
+  docClient.update(params, function(err, data) {
+    if (err) {
+        return next(err);
+    } else {
+        res.json({
+          idToken: req.body.idToken,
+          newId: newId
+        })
+    }
+  });
+}
+
+exports.game_reviews_downvote = function(req, res, next) {
+  const newId = req.body.newId ? true : false;
+  var params = {
+    TableName:"Games",
+        Key:{
+        "GameID": req.body.gameID.toString(),
+        "Email": req.body.theirEmail
+    },
+    UpdateExpression: "REMOVE #uv.#em SET UpvotesCount = UpvotesCount - :val" ,
+    ConditionExpression: "attribute_exists(#uv.#em.Username)",
+    ExpressionAttributeNames: {
+        "#uv": "Upvotes",
+        "#em": req.body.email
+    },
+    ExpressionAttributeValues:{
+        ":val": 1,
+    },
+    ReturnValues:"UPDATED_NEW"
+  };
+  docClient.update(params, function(err, data) {
+    if (err) {
+        return next(err);
+    } else {
+        res.json({
+          idToken: req.body.idToken,
+          newId: newId
+        })
+    }
+  });
+}

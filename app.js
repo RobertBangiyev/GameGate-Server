@@ -11,8 +11,8 @@ app.use(express.urlencoded({ extended: false }));
 
 app.listen(process.env.PORT || 5000);
 
-app.get('/', (req, res) => {
-    res.redirect('/api');
-})
+// app.get('/', (req, res) => {
+//     res.redirect('/api');
+// })
 
 app.use('/api', apiRoute);

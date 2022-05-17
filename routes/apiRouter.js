@@ -66,4 +66,9 @@ router.post('/user/:username/dropped', userController.user_dropped_add);
 
 router.post('/user/:username/dropped/delete', userController.user_dropped_delete);
 
+router.post('/reviews/upvote', reviewController.game_reviews_upvote);
+
+router.post('/reviews/downvote', reviewController.game_reviews_downvote);
+
+
 module.exports = router;
